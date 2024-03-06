@@ -13,6 +13,7 @@ from transformers import AutoTokenizer
 from transformers import StoppingCriteria
 from transformers import StoppingCriteriaList
 from transformers.generation.streamers import TextStreamer
+# from vllm import LLM
 
 from refact_scratchpads import ScratchpadHuggingfaceBase
 from refact_scratchpads import ScratchpadHuggingfaceCompletion
@@ -28,7 +29,7 @@ from self_hosting_machinery.inference.inference_base import find_param_by_name
 from self_hosting_machinery.inference.lora_loader_mixin import LoraLoaderMixin
 
 quit_flag = False
-DEBUG = int(os.environ.get("DEBUG", "0"))
+DEBUG = int(os.environ.get("DEBUG", "false").lower() == "true" or os.environ.get("DEBUG", "0").lower() == "1")
 
 
 class CancellationStoppingCriteria(StoppingCriteria):
@@ -99,7 +100,6 @@ class SMCStream(TextStreamer):
                 more_toplevel_fields=[{}],
                 status="completed" if stream_end else "in_progress"
             )
-
 
 # NOTE: original class AutoGPTQForCausalLM do not handle cache_dir, so we customized it
 class CustomAutoGPTQForCausalLM(AutoGPTQForCausalLM):
@@ -174,6 +174,11 @@ class InferenceHF(InferenceBase, LoraLoaderMixin):
                         trust_remote_code=True,
                         local_files_only=local_files_only,
                         **self._model_dict["model_class_kwargs"])
+                # elif model_dict["backend"] == "vllm":
+                #     self._model = LLM(
+                #         self._model_dict["model_path"], download_dir=self.cache_dir, device=self._device,
+                #         trust_remote_code=True,
+                #         **self._model_dict["model_class_kwargs"])
                 else:
                     raise RuntimeError(f"unknown model backend {model_dict['backend']}")
                 break

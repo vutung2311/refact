@@ -5,7 +5,7 @@ REPO_DIR=$(realpath $SCRIPT_DIR/../..)
 
 ORIGIN_DOCKERFILE=${REPO_DIR}/Dockerfile
 
-CACHE_IMAGE="FROM ghcr.io/smallcloudai/refact_base_image:latest"
+CACHE_IMAGE="ghcr.io/smallcloudai/refact_base_image:latest"
 
-sed -i "s!INCLUDE Dockerfile.base!${CACHE_IMAGE}!" ${ORIGIN_DOCKERFILE}
+sed -i "s!./Dockerfile.base!${CACHE_IMAGE}!" ${ORIGIN_DOCKERFILE}
 

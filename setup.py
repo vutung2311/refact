@@ -54,7 +54,7 @@ all_refact_packages = {
         requires=["python-multipart", "auto-gptq==0.6.0", "accelerate",
                   "termcolor", "torch", "transformers>=4.39.3",
                   "bitsandbytes", "safetensors", "peft", "triton",
-                  "torchinfo", "mpi4py", "deepspeed==0.12.6",
+                  "torchinfo", "mpi4py", "deepspeed==0.13.5",
                   "sentence-transformers", "huggingface-hub>=0.19.3"],
         optional=["ninja", "flash-attn"],
         requires_packages=["refact_scratchpads", "refact_scratchpads_no_gpu",

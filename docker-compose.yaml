@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  refact:
+    image: refact:final
+    build:
+      context: .
+      shm_size: '256m'
+      args:
+        MAX_JOBS: 10
+        TORCH_CUDA_ARCH_LIST: '8.0 9.0+PTX'
+    runtime: nvidia
+    environment:
+      TOKENIZERS_PARALLELISM: true
+      DEBUG: true
+      NUMEXPR_MAX_THREADS: 10
+    healthcheck:
+      test:         
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "curl --head http://localhost:8008 || exit 1"
+        ]
+      interval: 5s
+      timeout: 30s
+      retries: 50
+      start_period: 10s
+    volumes:
+      - "./refact-perm-storage:/perm_storage"
+      - "./:/app"
+    ports:
+      - "8008:8008"
+    shm_size: '256m'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]

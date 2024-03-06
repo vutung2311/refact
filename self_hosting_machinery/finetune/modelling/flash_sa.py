@@ -43,7 +43,6 @@ def _get_alibi_slopes(attn_heads: int, dev: str) -> torch.Tensor:
         m = torch.cat([m, m_hat])
     return m
 
-
 def _prerequisites_are_ok(model, try_triton_kernel: bool):
     try:
         from flash_attn import flash_attn_func

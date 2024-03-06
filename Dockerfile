@@ -1,53 +1,64 @@
 # syntax = devthefuture/dockerfile-x
 
-INCLUDE Dockerfile.base
+FROM ./Dockerfile.base
 
-RUN apt-get update
-RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y \
-    curl \
-    git \
-    htop \
-    tmux \
-    file \
-    vim \
-    expect \
-    mpich \
-    libmpich-dev \
-    protobuf-compiler \
-    python3 python3-pip \
-    && rm -rf /var/lib/{apt,dpkg,cache,log}
-
-RUN echo "export PATH=/usr/local/cuda/bin:\$PATH" > /etc/profile.d/50-smc.sh
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-
-# auto-gptq
-RUN pip install auto-gptq==0.6.0 --extra-index-url https://huggingface.github.io/autogptq-index/whl/cu118/
-
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y python3-packaging
+ENV PATH="/opt/venv/bin:/usr/local/linguist/bin:${PATH}"
 
 # cassandra
-RUN apt-get install -y \
-    default-jdk \
-    wget \
-    sudo
-RUN echo "deb https://debian.cassandra.apache.org 41x main" | tee -a /etc/apt/sources.list.d/cassandra.sources.list
-RUN curl https://downloads.apache.org/cassandra/KEYS | apt-key add -
-RUN apt-get update
-RUN apt-get install cassandra -y
-
 # refact lsp requisites
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
-ENV PATH="${PATH}:/root/.cargo/bin"
-RUN git clone https://github.com/smallcloudai/refact-lsp.git /tmp/refact-lsp
-RUN echo "refact-lsp $(git -C /tmp/refact-lsp rev-parse HEAD)" >> /refact-build-info.txt
-RUN cd /tmp/refact-lsp \
-    && cargo install --path . \
+RUN export DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC \
+    && apt-get update \
+    && apt-get install -y \
+        curl \
+        build-essential \
+        git \
+        htop \
+        libssl-dev \
+        python3 \
+        python3-pip \
+        python3-venv \
+        ruby-full \
+        ruby-bundler \
+        tmux \
+        file \
+        vim \
+        expect \
+        mpich \
+        libmpich-dev \
+        pkg-config \
+        default-jdk \
+        wget \
+        protobuf-compiler \
+        sudo \
+    \
+    && echo "deb https://debian.cassandra.apache.org 41x main" | tee -a /etc/apt/sources.list.d/cassandra.sources.list \
+    && curl https://downloads.apache.org/cassandra/KEYS | apt-key add - \
+    && apt-get update \
+    && apt-get install cassandra -y \
+    && rm -rf /var/lib/{apt,dpkg,cache,log}
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y \
+    && export PATH="${PATH}:/root/.cargo/bin" \
+    && git clone https://github.com/smallcloudai/refact-lsp.git /tmp/refact-lsp \
+    && echo "refact-lsp $(git -C /tmp/refact-lsp rev-parse HEAD)" >> /refact-build-info.txt \
+    && cd /tmp/refact-lsp \
+    && cargo install --path . --root /usr/local \
     && rm -rf /tmp/refact-lsp
 
-COPY . /tmp/app
-RUN echo "refact $(git -C /tmp/app rev-parse HEAD)" >> /refact-build-info.txt
-RUN pip install ninja
-RUN pip install /tmp/app -v --no-build-isolation && rm -rf /tmp/app
+ARG MAX_JOBS=8
+ARG USE_NINJA=1
+ARG NINJAFLAGS="-j${MAX_JOBS}}"
+ARG TORCH_CUDA_ARCH_LIST="8.0 9.0+PTX"
+ARG NVCC_THREADS=${MAX_JOBS}
+ARG USE_FLASH_ATTENTION=1
+ARG USE_MEM_EFF_ATTENTION=1
+
+WORKDIR /app
+
+COPY . /app
+RUN echo "refact $(git -C /app rev-parse HEAD)" >> /refact-build-info.txt \
+    && pip install wheel setuptools \
+    && pip install -e . -v --no-build-isolation
 
 ENV REFACT_PERM_DIR "/perm_storage"
 ENV REFACT_TMP_DIR "/tmp"

@@ -1,32 +1,45 @@
 FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 
-ENV INSTALL_OPTIONAL=TRUE
-ENV MAX_JOBS=8
+ARG MAX_JOBS=8
+ARG USE_NINJA=1
+ARG NINJAFLAGS="-j${MAX_JOBS}}"
+ARG TORCH_CUDA_ARCH_LIST="8.0 9.0+PTX"
+ARG NVCC_THREADS=${MAX_JOBS}
+ARG USE_FLASH_ATTENTION=1
+ARG USE_MEM_EFF_ATTENTION=1
 
-RUN apt-get update
-RUN DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get install -y  \
-    git  \
-    python3  \
-    python3-pip  \
-    python3-packaging  \
-    expect \
-    ruby-full \
-    ruby-bundler \
-    build-essential \
-    cmake \
-    pkg-config \
-    libicu-dev \
-    zlib1g-dev \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    && rm -rf /var/lib/{apt,dpkg,cache,log}
-RUN git clone https://github.com/smallcloudai/linguist.git /tmp/linguist \
-    && cd /tmp/linguist \
+RUN apt-get update \
+    && export DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC \
+    && apt-get install -y  \
+        git \
+        python3 \
+        python3-pip \
+        python3-venv \
+        expect \
+        ruby-full \
+        ruby-bundler \
+        build-essential \
+        cmake \
+        pkg-config \
+        libicu-dev \
+        zlib1g-dev \
+        libcurl4-openssl-dev \
+        libssl-dev \
+    && rm -rf /var/lib/{apt,dpkg,cache,log} \
+    \
+    && git clone --depth=1 https://github.com/smallcloudai/linguist.git /usr/local/linguist \
+    && cd /usr/local/linguist \
     && bundle install \
     && rake build_gem
-ENV PATH="${PATH}:/tmp/linguist/bin"
+ENV PATH="${PATH}:/usr/local/linguist/bin"
+RUN python3 -m venv /opt/venv
+# Make sure we use the virtualenv
+ENV PATH="/opt/venv/bin:${PATH}"
 
-RUN pip install --no-cache-dir torch==2.1.2 --index-url https://download.pytorch.org/whl/cu118
-RUN pip install --no-cache-dir xformers==0.0.23.post1 --index-url https://download.pytorch.org/whl/cu118
-RUN pip install ninja
-RUN VLLM_INSTALL_PUNICA_KERNELS=1 pip install -v --no-build-isolation git+https://github.com/smallcloudai/vllm@refact_model_lora_support
+RUN pip install packaging wheel setuptools \
+    && pip install --no-cache-dir xformers==0.0.24 --index-url https://download.pytorch.org/whl/cu118 \ 
+    && pip install --no-cache-dir ninja \
+    && pip install --no-cache-dir flash_attn==2.5.6 --no-build-isolation \
+    && pip install -v git+https://github.com/huggingface/transformers \
+    && VLLM_INSTALL_PUNICA_KERNELS=1 pip install -v --no-build-isolation git+https://github.com/smallcloudai/vllm@refact_model_lora_support \
+    && pip install --no-cache-dir auto-gptq==0.7.1 --extra-index-url https://huggingface.github.io/autogptq-index/whl/cu118/

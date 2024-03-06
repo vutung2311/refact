@@ -33,8 +33,9 @@ def query_nvidia_smi():
                 "mem_total_mb": gpu_mem_total_mb,
                 "temp_celsius": gpu_temp_celsius,
             })
-    except Exception:
+    except Exception as err:
         logging.warning("nvidia-smi does not work, that's especially bad for initial setup.")
+        logging.warning(err.stderr)
         logging.warning(traceback.format_exc())
         logging.warning(f"output was:\n{nvidia_smi_output}")
 
