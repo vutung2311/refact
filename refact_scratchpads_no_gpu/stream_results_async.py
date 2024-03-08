@@ -237,7 +237,7 @@ class UploadAsync:
                 cancelled_n,
                 ))
             if j.get("retcode", "FAIL") != "OK":
-                logger.warning("Server returned:", txt[:150])
+                logger.warning("Server returned: %s" % txt[:150])
 
     async def shutdown_coroutine(self):
         await self.upload_q.put({"exit": True})

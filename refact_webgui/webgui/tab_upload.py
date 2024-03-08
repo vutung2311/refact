@@ -5,11 +5,11 @@ import time
 import shutil
 import subprocess
 import filelock
-from typing import Dict, Optional
+from typing import Dict, Optional, Annotated
 
 import aiohttp
 
-from pydantic import BaseModel, Required
+from pydantic import BaseModel
 from fastapi import APIRouter, Request, Query, UploadFile, HTTPException
 from fastapi.responses import Response, JSONResponse, StreamingResponse
 
@@ -71,8 +71,8 @@ class CloneRepo(BaseModel):
 
 
 class TabSingleFileConfig(BaseModel):
-    which_set: str = Query(default=Required, regex="auto|train|test")
-    to_db: bool = Query(default=False)
+    which_set: Annotated[str, Query(pattern=r"auto|train|test")]
+    to_db: Annotated[bool, Query()] = False
 
 
 class TabFilesConfig(BaseModel):
@@ -80,18 +80,18 @@ class TabFilesConfig(BaseModel):
 
 
 class FileTypesSetup(BaseModel):
-    filetypes_finetune: Dict[str, bool] = Query(default={})
-    filetypes_db: Dict[str, bool] = Query(default={})
-    force_include: str = Query(default="")
-    force_exclude: str = Query(default="")
+    filetypes_finetune: Annotated[Dict[str, bool], Query()] = {}
+    filetypes_db:  Annotated[Dict[str, bool], Query()] = {}
+    force_include: Annotated[str, Query()] = ""
+    force_exclude: Annotated[str, Query()] = ""
 
 
 class TabFilesDeleteEntry(BaseModel):
-    delete_this: str = Query(default=Required, regex=r'^(?!.*\/)(?!.*\.\.)[\s\S]+$')
+    delete_this: Annotated[str, Query(pattern=r"^[^\n/]*(?:/[^/\n]*)*$")]
 
 
 class ProjectNameOnly(BaseModel):
-    pname: str = Query(default=Required, regex=r'^[A-Za-z0-9_\-\.]{1,30}$')
+    pname: str = Query(pattern=r'^[A-Za-z0-9_\-\.]{1,30}$')
 
 
 class TabUploadRouter(APIRouter):

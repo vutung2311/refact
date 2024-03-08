@@ -359,6 +359,6 @@ def _upload_results_loop(upload_q: multiprocessing.Queue, cancelled_q: multiproc
             cancelled_n,
             ))
         if j.get("retcode", "FAIL") != "OK":
-            logger.warning("Server returned:", str(j))
+            logger.warning("Server returned: %s" % str(j))
         if DEBUG_UPLOAD_NOT_SEPARATE_PROCESS:
             break

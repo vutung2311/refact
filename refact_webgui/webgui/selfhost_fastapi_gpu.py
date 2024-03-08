@@ -9,8 +9,8 @@ from refact_webgui.webgui.selfhost_queue import Ticket
 from refact_webgui.webgui.selfhost_webutils import log
 from refact_webgui.webgui.selfhost_queue import InferenceQueue
 
-from pydantic import BaseModel, Required
-from typing import Dict, List, Optional, Any
+from pydantic import BaseModel
+from typing import Dict, List, Optional, Any, Annotated
 
 
 __all__ = ["GPURouter"]
@@ -41,8 +41,8 @@ def verify_bearer(authorization: str):
 
 class EngineDescription(BaseModel):
     infmod_guid: str
-    B: int = Query(default=0, ge=1, le=64)
-    model: str = Query(default=Required, regex="^[a-z/A-Z0-9_\.\-]+$")
+    B: Annotated[int, Query(ge=1, le=64)] = 0
+    model: Annotated[str, Query(pattern=r"^[a-z/A-Z0-9_\.\-]+$")]
     engine_started_ts: int
     max_thinking_time: int
 
@@ -55,12 +55,12 @@ class HeadMidTail(BaseModel):
 
 class SubSingleNlpChoice(BaseModel):
     index: int
-    files: Optional[Dict[str, str]]
-    files_head_mid_tail: Optional[Dict[str, HeadMidTail]]
-    role: Optional[str]
-    content: Optional[str]
-    logprobs: Optional[float]
-    finish_reason: Optional[str]
+    files: Optional[Dict[str, str]] = {}
+    files_head_mid_tail: Optional[Dict[str, HeadMidTail]] = {}
+    role: Optional[str] = None
+    content: Optional[str] = None
+    logprobs: Optional[float] = None
+    finish_reason: Optional[str] = None
 
 
 class SingleNlpResponse(BaseModel):
@@ -68,7 +68,7 @@ class SingleNlpResponse(BaseModel):
     object: str
     choices: List[SubSingleNlpChoice]
     status: str
-    more_toplevel_fields: Optional[Dict[str, Any]]
+    more_toplevel_fields: Optional[Dict[str, Any]] = None
     created: float = 0
     generated_tokens_n: int = 0
 

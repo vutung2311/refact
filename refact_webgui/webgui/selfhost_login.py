@@ -8,19 +8,18 @@ from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
 
 from pydantic import BaseModel
-from pydantic import Required
 
 from refact_utils.scripts import env
 from refact_webgui.webgui import static_folders
 
-from typing import List
+from typing import List, Annotated
 
 
 __all__ = ["RefactSession", "DummySession", "AdminSession", "AdminRouter"]
 
 
 class Credentials(BaseModel):
-    token: str = Query(default=Required)
+    token: Annotated[str, Query()]
 
 
 class RefactSession:

@@ -24,8 +24,9 @@ from refact_webgui.webgui.selfhost_queue import InferenceQueue
 from refact_webgui.webgui.selfhost_model_assigner import ModelAssigner
 from refact_webgui.webgui.selfhost_login import RefactSession
 
-from pydantic import BaseModel, Required
-from typing import List, Dict, Union, Optional, Tuple, Any
+from pydantic import BaseModel
+from typing import List, Dict, Union, Annotated, Any, Tuple, Optional
+
 
 __all__ = ["BaseCompletionsRouter", "CompletionsRouter"]
 
@@ -71,7 +72,7 @@ class NlpSamplingParams(BaseModel):
 
 
 class NlpCompletion(NlpSamplingParams):
-    model: str = Query(default=Required, regex="^[a-z/A-Z0-9_\.\-\:]+$")
+    model: Annotated[str, Query(pattern=r"^[a-z/A-Z0-9_\.\-]+$")]
     prompt: str
     n: int = 1
     echo: bool = False
@@ -87,13 +88,13 @@ class ChatMessage(BaseModel):
 class ChatContext(NlpSamplingParams):
     messages: List[ChatMessage]
     n: int = 1
-    model: str = Query(default=Required, regex="^[a-z/A-Z0-9_\.\-]+$")
-    function: str = Query(default="chat", regex="^[a-zA-Z0-9_\.\-]+$")
+    model: Annotated[str, Query(pattern=r"^[a-z/A-Z0-9_\.\-]+$")]
+    function: Annotated[str, Query(pattern=r"^[a-zA-Z0-9_\.\-]+$")] = "chat"
 
 
 class EmbeddingsStyleOpenAI(BaseModel):
     input: Union[str, List[str]]
-    model: str = Query(default=Required, regex="^[a-z/A-Z0-9_\.\-]+$")
+    model: Annotated[str, Query(pattern=r"^[a-z/A-Z0-9_\.\-]+$")]
 
 
 def _mask_emails(text: str, mask: str = "john@example.com") -> str:
