@@ -55,8 +55,9 @@ all_refact_packages = {
                   "termcolor", "torch", "transformers>=4.39.3",
                   "bitsandbytes", "safetensors", "peft", "triton",
                   "torchinfo", "mpi4py", "deepspeed==0.13.5",
-                  "sentence-transformers", "huggingface-hub>=0.19.3"],
-        optional=["ninja", "flash-attn"],
+                  "sentence-transformers", "huggingface-hub>=0.19.3"
+                  "flash_attn>=2.5.6"],
+        optional=["ninja"],
         requires_packages=["refact_scratchpads", "refact_scratchpads_no_gpu",
                            "known_models_db", "refact_data_pipeline",
                            "refact_webgui", "refact_utils"],

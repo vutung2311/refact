@@ -37,9 +37,7 @@ RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:${PATH}"
 
 RUN pip install packaging wheel setuptools \
-    && pip install --no-cache-dir xformers==0.0.24 --index-url https://download.pytorch.org/whl/cu118 \ 
     && pip install --no-cache-dir ninja \
-    && pip install --no-cache-dir flash_attn==2.5.6 --no-build-isolation \
+    && pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118 \
     && pip install -v git+https://github.com/huggingface/transformers \
-    && VLLM_INSTALL_PUNICA_KERNELS=1 pip install -v --no-build-isolation git+https://github.com/smallcloudai/vllm@refact_model_lora_support \
-    && pip install --no-cache-dir auto-gptq==0.7.1 --extra-index-url https://huggingface.github.io/autogptq-index/whl/cu118/
+    && VLLM_INSTALL_PUNICA_KERNELS=1 pip install -v --no-build-isolation git+https://github.com/smallcloudai/vllm@refact_model_lora_support
