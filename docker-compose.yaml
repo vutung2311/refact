@@ -14,6 +14,7 @@ services:
       TOKENIZERS_PARALLELISM: true
       DEBUG: true
       NUMEXPR_MAX_THREADS: 10
+      REFACT_DATABASE_HOST: scylla
     healthcheck:
       test:         
         [
@@ -39,3 +40,9 @@ services:
             - driver: nvidia
               count: all
               capabilities: [ gpu ]
+    depends_on:
+      - scylla
+  scylla:
+    image: scylladb/scylla:5.2.17
+    volumes:
+      - "./scylla-perm-storage:/var/lib/scylla"

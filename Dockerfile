@@ -4,7 +4,6 @@ FROM ./Dockerfile.base
 
 ENV PATH="/opt/venv/bin:/usr/local/linguist/bin:${PATH}"
 
-# cassandra
 # refact lsp requisites
 RUN export DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC \
     && apt-get update \
@@ -31,10 +30,6 @@ RUN export DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC \
         protobuf-compiler \
         sudo \
     \
-    && echo "deb https://debian.cassandra.apache.org 41x main" | tee -a /etc/apt/sources.list.d/cassandra.sources.list \
-    && curl https://downloads.apache.org/cassandra/KEYS | apt-key add - \
-    && apt-get update \
-    && apt-get install cassandra -y \
     && rm -rf /var/lib/{apt,dpkg,cache,log}
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y \
@@ -67,8 +62,6 @@ ENV RDMAV_HUGEPAGES_SAFE 0
 
 EXPOSE 8008
 
-COPY database-start.sh /
-RUN chmod +x database-start.sh
 COPY docker-entrypoint.sh /
 RUN chmod +x docker-entrypoint.sh
 
