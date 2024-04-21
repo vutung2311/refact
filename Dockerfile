@@ -53,6 +53,7 @@ WORKDIR /app
 COPY . /app
 RUN echo "refact $(git -C /app rev-parse HEAD)" >> /refact-build-info.txt \
     && pip install wheel setuptools \
+    && pip install auto-gptq==0.6.0 --extra-index-url https://huggingface.github.io/autogptq-index/whl/cu118/ \
     && pip install -e . -v --no-build-isolation
 
 ENV REFACT_PERM_DIR "/perm_storage"

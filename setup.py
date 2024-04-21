@@ -52,7 +52,7 @@ all_refact_packages = {
               "webgui/static/dashboards/*", "webgui/static/assets/*", "webgui/static/utils/*",]),
     "self_hosting_machinery": PyPackage(
         requires=["python-multipart", "auto-gptq==0.6.0", "accelerate",
-                  "termcolor", "torch", "transformers>=4.39.3",
+                  "termcolor", "torch", "transformers==4.37.2",
                   "bitsandbytes", "safetensors", "peft", "triton",
                   "torchinfo", "mpi4py", "deepspeed==0.13.5",
                   "sentence-transformers", "huggingface-hub>=0.19.3"
